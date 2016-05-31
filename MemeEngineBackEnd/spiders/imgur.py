@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 
-from MECrawlerIndexer.items import Meme
+from MemeEngineBackEnd.items import Meme
 
 SUFFIX = "/t/memes/time/page/"
 

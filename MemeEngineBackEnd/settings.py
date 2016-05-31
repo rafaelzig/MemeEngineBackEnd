@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Scrapy settings for MECrawlerIndexer project
+# Scrapy settings for MemeEngineBackEnd project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -9,14 +9,14 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'MECrawlerIndexer'
-SPIDER_MODULES = ['MECrawlerIndexer.spiders']
-NEWSPIDER_MODULE = 'MECrawlerIndexer.spiders'
+BOT_NAME = 'MemeEngineBackEnd'
+SPIDER_MODULES = ['MemeEngineBackEnd.spiders']
+NEWSPIDER_MODULE = 'MemeEngineBackEnd.spiders'
 MONGODB_URI = "localhost:27017"
-MONGODB_DATABASE = "MECrawlerIndexer"
+MONGODB_DATABASE = "MemeEngineBackEnd"
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-# USER_AGENT = 'MECrawlerIndexer (+http://www.yourdomain.com)'
+# USER_AGENT = 'MemeEngineBackEnd (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -47,13 +47,13 @@ COOKIES_ENABLED = False
 # Enable or disable spider middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 # SPIDER_MIDDLEWARES = {
-#    'MECrawlerIndexer.middlewares.MyCustomSpiderMiddleware': 543,
+#    'MemeEngineBackEnd.middlewares.MyCustomSpiderMiddleware': 543,
 # }
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 # DOWNLOADER_MIDDLEWARES = {
-#    'MECrawlerIndexer.middlewares.MyCustomDownloaderMiddleware': 543,
+#    'MemeEngineBackEnd.middlewares.MyCustomDownloaderMiddleware': 543,
 # }
 
 # Enable or disable extensions
@@ -65,10 +65,10 @@ COOKIES_ENABLED = False
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-	"MECrawlerIndexer.pipelines.DuplicateCheckerPipeline": 1,
-	"MECrawlerIndexer.pipelines.ValidatorPipeline": 2,
-	"MECrawlerIndexer.pipelines.NormalizerPipeline": 3,
-	"MECrawlerIndexer.pipelines.DBInserterPipeline": 4,
+	"MemeEngineBackEnd.pipelines.DuplicateCheckerPipeline": 1,
+	"MemeEngineBackEnd.pipelines.ValidatorPipeline": 2,
+	"MemeEngineBackEnd.pipelines.NormalizerPipeline": 3,
+	"MemeEngineBackEnd.pipelines.DBInserterPipeline": 4,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

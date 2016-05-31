@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 
-from MECrawlerIndexer.items import Meme
+from MemeEngineBackEnd.items import Meme
 
 SUFFIX = "/page/"
 IMAGE_DATA_TYPE = '1'
