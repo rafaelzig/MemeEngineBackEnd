@@ -1,10 +1,11 @@
 # coding=utf-8
+import logging
 import re
 
 import pymongo
 from nltk import PorterStemmer, download, RegexpTokenizer
 from nltk.corpus import stopwords
-from scrapy.exceptions import DropItem, CloseSpider
+from scrapy.exceptions import DropItem
 
 
 class DuplicateCheckerPipeline(object):
@@ -22,16 +23,15 @@ class DuplicateCheckerPipeline(object):
 	def open_spider(self, spider):
 		client = pymongo.MongoClient(self.mongo_uri)
 		db = client[self.mongo_db]
-		self.seen = [result["url"] for result in db.Memes.find({}, {"url": 1})]
-		if self.seen is None:
-			self.seen = []
+		self.seen = set(result["url"] for result in db.Memes.find({}, {"url": 1}))
 		client.close()
 
 	def process_item(self, meme, spider):
 		if meme["url"] in self.seen:
-			raise CloseSpider("Duplicate meme found: %s" % meme)
+			spider.isAlive = False
+			raise DropItem("Duplicate meme in %s" % meme)
 		else:
-			self.seen.append(meme["url"])
+			self.seen.add(meme["url"])
 		return meme
 
 
@@ -99,7 +99,8 @@ class DBInserterPipeline(object):
 						"$set": {"_id": term},
 						"$inc": {"total_documents": freq[0], "total_frequency": freq[1]}
 					})
-			bulk.execute()
+			result = bulk.execute()
+			logging.log(logging.INFO, "%d dictionary entries updated." % result["nUpserted"])
 		self.client.close()
 
 	def process_item(self, meme, spider):
@@ -127,4 +128,6 @@ class DBInserterPipeline(object):
 			else:
 				global_frequency = [1, frequency]
 			self.global_postings[term] = global_frequency
+
+		logging.log(logging.INFO, "Successfully indexed %s" % meme)
 		return meme
