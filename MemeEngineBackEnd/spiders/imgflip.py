@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrapy.exceptions import CloseSpider
 
 from MemeEngineBackEnd.items import Meme
 
 
 class ImgFlipSpider(scrapy.Spider):
 	name = "ImgFlip"
-	isAlive = True
+	# isAlive = True
 	allowed_domains = ["imgflip.com"]
 	start_urls = ["https://imgflip.com/?sort=latest&tgz=memes"]
 
 	def parse(self, response):
 		for post in response.xpath("//div[@class='base-unit clearfix']"):
-			if self.isAlive:
+			# if self.isAlive:
 				meme = Meme()
 				meme["source"] = self.allowed_domains[0]
 				meme["title"] = ""
@@ -28,8 +27,8 @@ class ImgFlipSpider(scrapy.Spider):
 				temp = post.xpath(".//div[@class='base-view-count']/text()").re("(\d+)\s(?:upvote)")
 				meme["score"] = temp[0] if temp else "0"
 				yield meme
-			else:
-				raise CloseSpider(reason="Previously crawled content found.")
+		# else:
+		# 	raise CloseSpider(reason="Previously crawled content found.")
 		next_page = response.xpath("//a[@class='pager-next l but']/@href")
 		if next_page:
 			url = response.urljoin(next_page.extract_first())

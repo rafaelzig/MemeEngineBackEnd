@@ -10,7 +10,6 @@ import scrapy
 
 class Meme(scrapy.Item):
 	# define the fields for your item here like:
-	# name = scrapy.Field()
 	source = scrapy.Field()
 	image = scrapy.Field()
 	url = scrapy.Field()

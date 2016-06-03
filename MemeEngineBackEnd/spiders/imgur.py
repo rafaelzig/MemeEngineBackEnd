@@ -34,7 +34,8 @@ class ImgUrSpider(scrapy.Spider):
 			meme["url"] = response.url
 			meme["source"] = self.allowed_domains[0]
 			meme["id"] = response.xpath("//div[@class='post-image-container']/@id").extract_first()
-			meme["score"] = response.xpath("//span[@class='points-" + meme["id"] + "']/text()").extract_first()
+			meme["score"] = response.xpath("//span[@class='points-" + meme["id"] + "']/text()").extract_first().replace(
+				',', '')
 			temp = response.xpath("/html/head")
 			meme["title"] = temp.xpath("./meta[@property='og:title']/@content").extract_first()
 			meme["image"] = temp.xpath("./link[@rel='image_src']/@href").extract_first()

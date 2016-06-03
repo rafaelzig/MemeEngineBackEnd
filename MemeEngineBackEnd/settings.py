@@ -12,7 +12,7 @@
 BOT_NAME = 'MemeEngineBackEnd'
 SPIDER_MODULES = ['MemeEngineBackEnd.spiders']
 NEWSPIDER_MODULE = 'MemeEngineBackEnd.spiders'
-LOG_LEVEL = "INFO"
+# LOG_LEVEL = "INFO"
 MONGODB_URI = "localhost:27017"
 MONGODB_DATABASE = "MemeEngine"
 

@@ -67,6 +67,8 @@ class NormalizerPipeline(object):
 				download("stopwords")
 			else:
 				break
+		if not filtered:
+			raise DropItem("No tokens found in %s" % meme)
 		meme["postings"] = {key: tokens.count(key) for key in filtered}
 		meme["length"] = reduce(lambda x, y: x + y, meme["postings"].itervalues())
 		return meme
@@ -91,6 +93,43 @@ class DBInserterPipeline(object):
 		self.db = self.client[self.mongo_db]
 
 	def close_spider(self, spider):
+		self.update_dictionary()
+
+	def process_item(self, meme, spider):
+		self.add_to_database(meme)
+		self.update_global_postings(meme)
+		logging.log(logging.INFO, "Successfully indexed %s" % meme)
+		return meme
+
+	def add_to_database(self, meme):
+		self.db.Memes.insert_one(
+			{
+				"_id": {"source": meme["source"], "meme_id": meme["id"]},
+				"url": meme["url"],
+				"image": meme["image"],
+				"name": meme["name"],
+				"title": meme["title"],
+				"caption": meme["caption"],
+				"score": meme["score"],
+				"length": meme["length"],
+				"postings": meme["postings"]
+			})
+
+	# self.db.Postings.insert_many(
+	# [{"_id": {"term": term, "Memes_id": memes_id}, "frequency": frequency}
+	#  for term, frequency in meme["postings"].iteritems()], False)
+
+	def update_global_postings(self, meme):
+		for term, frequency in meme["postings"].iteritems():
+			global_frequency = self.global_postings.get(term)
+			if global_frequency is not None:
+				global_frequency[0] += 1
+				global_frequency[1] += frequency
+			else:
+				global_frequency = [1, frequency]
+			self.global_postings[term] = global_frequency
+
+	def update_dictionary(self):
 		if self.global_postings:
 			bulk = self.db.Dictionary.initialize_unordered_bulk_op()
 			for term, freq in self.global_postings.iteritems():
@@ -102,32 +141,3 @@ class DBInserterPipeline(object):
 			result = bulk.execute()
 			logging.log(logging.INFO, "%d dictionary entries updated." % result["nUpserted"])
 		self.client.close()
-
-	def process_item(self, meme, spider):
-		memes_id = {"source": meme["source"], "meme_id": meme["id"]}
-		self.db.Memes.insert_one(
-			{
-				"_id": memes_id,
-				"url": meme["url"],
-				"image": meme["image"],
-				"name": meme["name"],
-				"title": meme["title"],
-				"caption": meme["caption"],
-				"score": meme["score"],
-				"length": meme["length"]
-			})
-		self.db.Postings.insert_many(
-			[{"_id": {"term": term, "Memes_id": memes_id}, "frequency": frequency}
-			 for term, frequency in meme["postings"].iteritems()], False)
-
-		for term, frequency in meme["postings"].iteritems():
-			global_frequency = self.global_postings.get(term)
-			if global_frequency is not None:
-				global_frequency[0] += 1
-				global_frequency[1] += frequency
-			else:
-				global_frequency = [1, frequency]
-			self.global_postings[term] = global_frequency
-
-		logging.log(logging.INFO, "Successfully indexed %s" % meme)
-		return meme

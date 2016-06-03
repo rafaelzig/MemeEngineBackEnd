@@ -1,0 +1,9 @@
+#!/bin/bash
+PATH=$PATH:/usr/local/bin
+export PATH
+now=$(date +"%m_%d_%Y")
+spider=`basename "$0"`
+path="/home/rafael/MemeEngineBackEnd/"
+cd $path
+path+="logs/$spider/$now.log"
+scrapy crawl $spider --logfile $path

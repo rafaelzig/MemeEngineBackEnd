@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrapy.exceptions import CloseSpider
 
 from MemeEngineBackEnd.items import Meme
 
@@ -10,13 +9,13 @@ IMAGE_DATA_TYPE = '1'
 
 class MemeCenterSpider(scrapy.Spider):
 	name = "MemeCenter"
-	isAlive = True
+	# isAlive = True
 	allowed_domains = ["memecenter.com"]
 	start_urls = ["http://www.memecenter.com" + SUFFIX + '1']
 
 	def parse(self, response):
 		for post in response.xpath("//div[@class='content  ']"):
-			if self.isAlive:
+			# if self.isAlive:
 				if post.xpath("./@data-type").extract_first() == IMAGE_DATA_TYPE:  # Skip videos and gifs
 					meme = Meme()
 					meme["source"] = self.allowed_domains[0]
@@ -27,10 +26,11 @@ class MemeCenterSpider(scrapy.Spider):
 					temp = post.xpath(".//img[@class='rrcont']")
 					meme["title"] = temp.xpath("./@alt").extract_first()
 					meme["image"] = temp.xpath("./@src").extract_first()
-					meme["score"] = post.xpath(".//div[@class='like act_like']/div[2]/span/text()").extract_first()
+					meme["score"] = post.xpath(
+						".//div[@class='like act_like']/div[2]/span/text()").extract_first().replace(',', '')
 					yield meme
-			else:
-				raise CloseSpider(reason="Previously crawled content found.")
+				# else:
+				# 	raise CloseSpider(reason="Previously crawled content found.")
 		url = response.url.split('/')
 		url = response.urljoin(SUFFIX + str(int(url[len(url) - 1]) + 1))
 		yield scrapy.Request(url, self.parse)

@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrapy.exceptions import CloseSpider
 
 from MemeEngineBackEnd.items import Meme
 
 
 class MemeGeneratorSpider(scrapy.Spider):
 	name = "MemeGenerator"
-	isAlive = True
+	# isAlive = True
 	allowed_domains = ["memegenerator.net"]
 	start_urls = ["https://memegenerator.net/images/new/week"]
 
 	def parse(self, response):
 		for post in response.xpath("//div[@class='item_medium_small display-hover-container']"):
-			if self.isAlive:
+			# if self.isAlive:
 				meme = Meme()
 				meme["title"] = ""
 				meme["source"] = self.allowed_domains[0]
@@ -27,8 +26,8 @@ class MemeGeneratorSpider(scrapy.Spider):
 				meme["name"] = temp[0]
 				meme["caption"] = temp[1]
 				yield meme
-			else:
-				raise CloseSpider(reason="Previously crawled content found.")
+		# else:
+		# 	raise CloseSpider(reason="Previously crawled content found.")
 		temp = response.xpath("//ul[@class='pager']/li/a")
 		next_page = temp[len(temp) - 1].xpath("./@href")
 		if next_page:
