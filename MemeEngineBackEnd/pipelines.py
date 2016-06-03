@@ -23,7 +23,7 @@ class DuplicateCheckerPipeline(object):
 	def open_spider(self, spider):
 		client = pymongo.MongoClient(self.mongo_uri)
 		db = client[self.mongo_db]
-		self.seen = set(result["url"] for result in db.Memes.find({}, {"url": 1}))
+		self.seen = set(result["url"] for result in db.memes.find({}, {"url": 1}))
 		client.close()
 
 	def process_item(self, meme, spider):
@@ -102,7 +102,7 @@ class DBInserterPipeline(object):
 		return meme
 
 	def add_to_database(self, meme):
-		self.db.Memes.insert_one(
+		self.db.memes.insert_one(
 			{
 				"_id": {"source": meme["source"], "meme_id": meme["id"]},
 				"url": meme["url"],
@@ -114,10 +114,6 @@ class DBInserterPipeline(object):
 				"length": meme["length"],
 				"postings": meme["postings"]
 			})
-
-	# self.db.Postings.insert_many(
-	# [{"_id": {"term": term, "Memes_id": memes_id}, "frequency": frequency}
-	#  for term, frequency in meme["postings"].iteritems()], False)
 
 	def update_global_postings(self, meme):
 		for term, frequency in meme["postings"].iteritems():
@@ -131,7 +127,7 @@ class DBInserterPipeline(object):
 
 	def update_dictionary(self):
 		if self.global_postings:
-			bulk = self.db.Dictionary.initialize_unordered_bulk_op()
+			bulk = self.db.dictionary.initialize_unordered_bulk_op()
 			for term, freq in self.global_postings.iteritems():
 				bulk.find({"_id": term}).upsert().update_one(
 					{
