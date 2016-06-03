@@ -12,7 +12,7 @@
 BOT_NAME = 'MemeEngineBackEnd'
 SPIDER_MODULES = ['MemeEngineBackEnd.spiders']
 NEWSPIDER_MODULE = 'MemeEngineBackEnd.spiders'
-# LOG_LEVEL = "INFO"
+LOG_LEVEL = "INFO"
 MONGODB_URI = "localhost:27017"
 MONGODB_DATABASE = "MemeEngine"
 
@@ -28,7 +28,7 @@ ROBOTSTXT_OBEY = True
 # Configure a delay for requests for the same website (default: 0)
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 2
+DOWNLOAD_DELAY = 1
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
@@ -67,9 +67,10 @@ COOKIES_ENABLED = False
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
 	"MemeEngineBackEnd.pipelines.DuplicateCheckerPipeline": 1,
-	"MemeEngineBackEnd.pipelines.ValidatorPipeline": 2,
-	"MemeEngineBackEnd.pipelines.NormalizerPipeline": 3,
-	"MemeEngineBackEnd.pipelines.DBInserterPipeline": 4,
+	"MemeEngineBackEnd.pipelines.CleanserPipeline": 2,
+	"MemeEngineBackEnd.pipelines.ValidatorPipeline": 3,
+	"MemeEngineBackEnd.pipelines.NormalizerPipeline": 4,
+	"MemeEngineBackEnd.pipelines.DBInserterPipeline": 5,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

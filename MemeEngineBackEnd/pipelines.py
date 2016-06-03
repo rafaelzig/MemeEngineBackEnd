@@ -23,31 +23,47 @@ class DuplicateCheckerPipeline(object):
 	def open_spider(self, spider):
 		client = pymongo.MongoClient(self.mongo_uri)
 		db = client[self.mongo_db]
-		self.seen = set(result["url"] for result in db.memes.find({}, {"url": 1}))
+		source = spider.allowed_domains[0]
+		self.seen = set(result["url"] for result in db.memes.find({"_id.source": source}, {"_id": 0, "url": 1}))
 		client.close()
 
 	def process_item(self, meme, spider):
 		if meme["url"] in self.seen:
 			spider.isAlive = False
-			raise DropItem("Duplicate meme in %s" % meme)
+			raise DropItem("Duplicate meme.")
 		else:
 			self.seen.add(meme["url"])
 		return meme
 
 
+class CleanserPipeline(object):
+	def process_item(self, meme, spider):
+		if meme["name"] is None:
+			meme["name"] = ""
+		if meme["title"] is None:
+			meme["title"] = ""
+		if meme["caption"] is None:
+			meme["caption"] = ""
+		if meme["score"] is None:
+			meme["score"] = '0'
+		return meme
+
+
 class ValidatorPipeline(object):
 	only_digits = re.compile("^-?\d+$")
-	valid_url = re.compile("^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w+\.-]*)*\/?$")
+	valid_url = re.compile("^((http[s]?|ftp):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$")
 
 	def process_item(self, meme, spider):
 		if not re.match(self.only_digits, meme["score"]):
-			raise DropItem("Incorrect SCORE format in %s" % meme)
+			raise DropItem("Incorrect SCORE format.")
 		if not re.match(self.valid_url, meme["url"]):
-			raise DropItem("Incorrect URL format in %s" % meme)
+			raise DropItem("Incorrect URL format.")
 		if not re.match(self.valid_url, meme["image"]):
-			raise DropItem("Incorrect IMAGE URL format in %s" % meme)
-		if re.match(self.valid_url, meme["caption"]) or re.match(self.valid_url, meme["title"]):
-			raise DropItem("Possible spam in %s" % meme)
+			raise DropItem("Incorrect IMAGE URL format.")
+		if re.match(self.valid_url, meme["caption"]):
+			raise DropItem("Possible spam in caption.")
+		if re.match(self.valid_url, meme["title"]):
+			raise DropItem("Possible spam in title.")
 		return meme
 
 
@@ -68,7 +84,7 @@ class NormalizerPipeline(object):
 			else:
 				break
 		if not filtered:
-			raise DropItem("No tokens found in %s" % meme)
+			raise DropItem("No tokens found in meme")
 		meme["postings"] = {key: tokens.count(key) for key in filtered}
 		meme["length"] = reduce(lambda x, y: x + y, meme["postings"].itervalues())
 		return meme
@@ -98,7 +114,7 @@ class DBInserterPipeline(object):
 	def process_item(self, meme, spider):
 		self.add_to_database(meme)
 		self.update_global_postings(meme)
-		logging.log(logging.INFO, "Successfully indexed %s" % meme)
+		logging.log(logging.INFO, "Successfully indexed meme %s" % meme["url"])
 		return meme
 
 	def add_to_database(self, meme):

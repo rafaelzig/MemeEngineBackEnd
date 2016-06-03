@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrapy.exceptions import CloseSpider
 
 from MemeEngineBackEnd.items import Meme
 
 
 class QuickMemeSpider(scrapy.Spider):
 	name = "QuickMeme"
-	isAlive = True
+	# isAlive = True
 	allowed_domains = ["quickmeme.com"]
 	start_urls = ["http://www.quickmeme.com/new"]
 
 	def parse(self, response):
 		for post in response.xpath("//div[@class='post']"):
-			if self.isAlive:
+			# if self.isAlive:
 				temp = post.xpath(".//div[@class='cat-info']/ul/li/a")
 				if temp.xpath("./@href").re("memes"):  # If it is a meme
 					meme = Meme()
@@ -28,8 +27,8 @@ class QuickMemeSpider(scrapy.Spider):
 						temp.xpath("./@src").extract_first()
 					meme["score"] = "".join(post.xpath(".//div[@class='sharecounts']/p//text()").re("\d+"))
 					yield meme
-			else:
-				raise CloseSpider(reason="Previously crawled content found.")
+				# else:
+				# 	raise CloseSpider(reason="Previously crawled content found.")
 		next_page = response.xpath("//a[@id='page-next']/@href")
 		if next_page:
 			url = response.urljoin(next_page.extract_first())
