@@ -59,6 +59,8 @@ class ValidatorPipeline(object):
 	def process_item(self, meme, spider):
 		if not re.match(self.only_digits, meme["score"]):
 			raise DropItem("Incorrect SCORE format.")
+		else:
+			meme["score"] = int(meme["score"])
 		if not re.match(self.valid_url, meme["url"]):
 			raise DropItem("Incorrect URL format.")
 		if not re.match(self.valid_url, meme["image"]):

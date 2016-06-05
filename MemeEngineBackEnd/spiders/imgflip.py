@@ -23,7 +23,7 @@ class ImgFlipSpider(scrapy.Spider):
 			meme["name"] = temp[0]
 			meme["caption"] = temp[1]
 			temp = post.xpath(".//div[@class='base-view-count']/text()").re("(\d+)\s(?:upvote)")
-			meme["score"] = temp[0] if temp else "0"
+			meme["score"] = temp[0] if temp else '0'
 			yield meme
 		next_page = response.xpath("//a[@class='pager-next l but']/@href")
 		if next_page:
