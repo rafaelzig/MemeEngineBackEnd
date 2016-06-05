@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrapy.exceptions import CloseSpider
 
 from MemeEngineBackEnd.items import Meme
 
@@ -9,18 +8,14 @@ SUFFIX = "/t/memes/time/page/"
 
 class ImgUrSpider(scrapy.Spider):
 	name = "ImgUr"
-	isAlive = True
 	allowed_domains = ["imgur.com"]
 	start_urls = ["http://imgur.com" + SUFFIX + '0']
 
 	def parse(self, response):
 		for post in response.xpath("//div[@class='post']"):
-			if self.isAlive:
-				if post.xpath(".//div[@class='post-info']/text()").re("image"):
-					url = response.urljoin(post.xpath("./a/@href").extract_first())
-					yield scrapy.Request(url, callback=self.parse_meme)
-			else:
-				raise CloseSpider(reason="Previously crawled content found.")
+			if post.xpath(".//div[@class='post-info']/text()").re("image"):
+				url = response.urljoin(post.xpath("./a/@href").extract_first())
+				yield scrapy.Request(url, callback=self.parse_meme)
 		url = response.url.split('/')
 		url = response.urljoin(SUFFIX + str(int(url[len(url) - 1]) + 1))
 		yield scrapy.Request(url, self.parse)

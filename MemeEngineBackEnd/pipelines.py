@@ -21,16 +21,19 @@ class DuplicateCheckerPipeline(object):
 		)
 
 	def open_spider(self, spider):
-		client = pymongo.MongoClient(self.mongo_uri)
-		db = client[self.mongo_db]
+		self.client = pymongo.MongoClient(self.mongo_uri)
+		self.db = self.client[self.mongo_db]
 		source = spider.allowed_domains[0]
-		self.seen = set(result["url"] for result in db.memes.find({"_id.source": source}, {"_id": 0, "url": 1}))
-		client.close()
+		self.seen = set(result["url"] for result in self.db.memes.find({"_id.source": source}, {"_id": 0, "url": 1}))
+
+	def close_spider(self, spider):
+		self.client.close()
 
 	def process_item(self, meme, spider):
 		if meme["url"] in self.seen:
-			spider.isAlive = False
-			raise DropItem("Duplicate meme.")
+			self.db.memes.update_one({"_id": {"source": meme["source"], "meme_id": meme["id"]}},
+									 {"$set": {"score": meme["score"]}})
+			raise DropItem("Duplicate meme found, updating db with latest information.")
 		else:
 			self.seen.add(meme["url"])
 		return meme
@@ -91,8 +94,6 @@ class NormalizerPipeline(object):
 
 
 class DBInserterPipeline(object):
-	global_postings = {}
-
 	def __init__(self, mongo_uri, mongo_db):
 		self.mongo_uri = mongo_uri
 		self.mongo_db = mongo_db
@@ -109,12 +110,12 @@ class DBInserterPipeline(object):
 		self.db = self.client[self.mongo_db]
 
 	def close_spider(self, spider):
-		self.update_dictionary()
+		self.client.close()
 
 	def process_item(self, meme, spider):
 		self.add_to_database(meme)
-		self.update_global_postings(meme)
-		logging.log(logging.INFO, "Successfully indexed meme %s" % meme["url"])
+		update_count = self.update_dictionary(meme)
+		logging.log(logging.INFO, "Indexed meme %s -> %d dictionary entries updated." % (meme["url"], update_count))
 		return meme
 
 	def add_to_database(self, meme):
@@ -131,25 +132,13 @@ class DBInserterPipeline(object):
 				"postings": meme["postings"]
 			})
 
-	def update_global_postings(self, meme):
-		for term, frequency in meme["postings"].iteritems():
-			global_frequency = self.global_postings.get(term)
-			if global_frequency is not None:
-				global_frequency[0] += 1
-				global_frequency[1] += frequency
-			else:
-				global_frequency = [1, frequency]
-			self.global_postings[term] = global_frequency
-
-	def update_dictionary(self):
-		if self.global_postings:
-			bulk = self.db.dictionary.initialize_unordered_bulk_op()
-			for term, freq in self.global_postings.iteritems():
-				bulk.find({"_id": term}).upsert().update_one(
-					{
-						"$set": {"_id": term},
-						"$inc": {"total_documents": freq[0], "total_frequency": freq[1]}
-					})
-			result = bulk.execute()
-			logging.log(logging.INFO, "%d dictionary entries updated." % result["nUpserted"])
-		self.client.close()
+	def update_dictionary(self, meme):
+		bulk = self.db.dictionary.initialize_unordered_bulk_op()
+		for term, freq in meme["postings"].iteritems():
+			bulk.find({"_id": term}).upsert().update_one(
+				{
+					"$set": {"_id": term},
+					"$inc": {"total_documents": 1, "total_frequency": freq}
+				})
+		execute = bulk.execute()
+		return execute["nUpserted"] + execute["nModified"]
