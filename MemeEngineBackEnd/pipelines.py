@@ -8,7 +8,7 @@ from nltk.corpus import stopwords
 from scrapy.exceptions import DropItem
 
 
-class DuplicateCheckerPipeline(object):
+class DuplicateCheckerPipeline(object):  # TODO Check for memes which contain similar text and captions as well
 	def __init__(self, mongo_uri, mongo_db):
 		self.mongo_uri = mongo_uri
 		self.mongo_db = mongo_db
@@ -63,7 +63,7 @@ class ValidatorPipeline(object):
 			meme["score"] = int(meme["score"])
 		if not re.match(self.valid_url, meme["url"]):
 			raise DropItem("Incorrect URL format.")
-		if not re.match(self.valid_url, meme["image"]):
+		if not re.match(self.valid_url, meme["image"]):  # TODO Improve this filter
 			raise DropItem("Incorrect IMAGE URL format.")
 		if re.match(self.valid_url, meme["caption"]):
 			raise DropItem("Possible spam in caption.")

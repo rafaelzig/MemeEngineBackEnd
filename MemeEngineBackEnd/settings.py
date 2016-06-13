@@ -59,9 +59,12 @@ COOKIES_ENABLED = False
 
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
-# EXTENSIONS = {
-#    'scrapy.extensions.telnet.TelnetConsole': None,
-# }
+EXTENSIONS = {
+	# 'scrapy.extensions.telnet.TelnetConsole': None,
+	# "scrapy.extensions.closespider.CloseSpider"
+}
+
+CLOSESPIDER_TIMEOUT = 7200
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html

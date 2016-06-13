@@ -6,7 +6,7 @@ from MemeEngineBackEnd.items import Meme
 SUFFIX = "/t/memes/time/page/"
 
 
-class ImgUrSpider(scrapy.Spider):
+class ImgUrSpider(scrapy.Spider):  # TODO Find memory leaks
 	name = "ImgUr"
 	allowed_domains = ["imgur.com"]
 	start_urls = ["http://imgur.com" + SUFFIX + '0']
