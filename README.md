@@ -1,5 +1,4 @@
 # SHUT UP AND TAKE MY MONEY !!!
-HEAD
 A Search Engine for Internet Memes
 
 New memes are created every second, they are viral by nature. Anybody may create and share new material on the major internet meme portals. Hence, quality of content can decrease due to inferior memes being spread around the internet, resulting in users being provided with a sub-standard subset of memes and making the task of filtering bad memes difficult.
