@@ -1,6 +1,9 @@
 # SHUT UP AND TAKE MY MONEY !!!
 
-## This is the back end part of the project, for the front end please refer to: https://github.com/rafaelzig/MemeEngine
+### This is the back end part of the project, for the front end please refer to: 
+https://github.com/rafaelzig/MemeEngine
+
+----
 
 A Search Engine for Internet Memes
 
